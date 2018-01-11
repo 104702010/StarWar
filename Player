@@ -1,0 +1,78 @@
+class Player {
+
+  float x, y;
+  float w = 115, h = 49;
+  float speed = 2f;
+  final float PLAYER_INIT_X = 0;
+  final float PLAYER_INIT_Y = height / 2 - 50 ;
+  int health = 5;
+  float frameCounter=0;
+
+  void update(){
+     image(plane, x, y,115,49); 
+        if(leftPressed){
+          x-= speed*2;
+        }
+        if(rightPressed){
+          x+= speed;
+        }
+        if(downPressed){
+          y+= speed;
+        }
+        if(upPressed){
+          y-= speed;
+        }
+        
+        if(x > width - 115){
+          x = width - 115;
+        }
+        if(x < 0){
+          x = 0;
+        }
+        if(y > height - 49){
+          y = height - 49;
+        }
+        if(y < 0){
+          y = 0;
+        }
+       
+  }
+  void hurt() {
+    health --;
+  }
+   
+  void shot() {
+    /*
+      Bullet(bulletX, bulletY, bulletXSpeed, "bulletYSpeed");
+      
+      If bullet will shot to fighter on the trace, you need to calculate "bulletYSpeed".
+    */
+    
+    for(int i = 0; i < pBullet.length; i++) {
+      if (pBullet[i] == null || pBullet[i].isAlive == false) {
+        pBullet[i] = new Bullet(1, x+w, y, 8f, 0); //Bullet(type, bulletX, bulletY, bulletXSpeed, bulletYSpeed);
+        break;
+      }
+       
+      if (i == pBullet.length-1 && pBullet[i] != null){
+        println("warning: need to expend pBullet length!");
+      } 
+    }
+  }
+  
+  boolean checkCollision(float targetX, float targetY, float targetW, float targetH) {
+    boolean isCollision = false;
+    
+    if(isHit(x, y, w, h, targetX, targetY, targetW, targetH)){
+      isCollision = true;
+      hurt();
+    }
+    
+    return isCollision;
+  }
+  Player(){    
+    x = PLAYER_INIT_X;
+    y = PLAYER_INIT_Y;
+    
+  }
+}
