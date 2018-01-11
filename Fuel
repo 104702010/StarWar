@@ -1,0 +1,46 @@
+class Fuel extends Item{
+   
+  Fuel(float x, float y){
+    super(x,y);
+  }
+  
+   void display(){ 
+    if(isAlive){
+      image(fuel, x, y,45,45);
+    }
+  }
+  
+  void checkCollision(Player player){ 
+      if(isAlive == true && isHit(x, y, 45, 45, player.x, player.y, player.w, player.h)){
+        //if(isAlive){
+        //   if(player.health < player.PLAYER_MAX_HEALTH){
+        //     player.health ++;
+        //     isAlive = false;
+        //   }
+        // }
+        addTime(FUEL_BONUS_SECONDS);
+        isAlive = false;
+        
+        
+        
+      }
+    }
+  
+  
+ 
+  
+  
+}
+ 
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+ 
