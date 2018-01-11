@@ -1,0 +1,45 @@
+class shotEnemy extends Enemy {
+  
+  shotEnemy() {
+    super();
+    enemy = loadImage("img/enemy2.png");
+  }
+      
+  void update() {
+    super.update();
+    
+    if(frameCounter % 50 == 0) {
+      shot();
+    }
+  }
+  
+  void move() {
+    super.move();
+    
+    x += xSpeed;
+    y += ySpeed;
+  }
+  
+  void display() {
+    super.display();
+  }
+
+  void shot() {
+    /*
+      Bullet(type, bulletX, bulletY, bulletXSpeed, "bulletYSpeed");
+      
+      If bullet will shot to fighter on the trace, you need to calculate "bulletYSpeed".
+    */
+    
+    for(int i = 0; i < eBullet.length; i++) {
+      if (eBullet[i] == null || eBullet[i].isAlive == false) {
+        eBullet[i] = new Bullet(0, x, y, -4f, 0); // Bullet(type, bulletX, bulletY, bulletXSpeed, bulletYSpeed);
+        break;
+      }
+       
+      if (i == eBullet.length-1 && eBullet[i] != null){
+        println("warning: need to expend eBullet length!");
+      } 
+    }
+  }
+}
