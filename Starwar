@@ -1,0 +1,434 @@
+PImage bg,plane,start1,start2,lose1,lose2,win,secondCrash,rule1,rule2;
+PImage diamond, fuel,hole;
+int bgX = 0;
+int bgSpeed = -2;
+
+int diamondPass=0;
+
+
+int numOfDiamond;
+int numOfFuel;
+int numOfHole;
+
+final int GAME_START = 0, GAME_RUN = 1,GAME_LOSE = 2,GAME_WIN = 3,GAME_RULE=4;
+
+int gameState = 0;
+
+boolean leftPressed = false;
+boolean rightPressed = false;
+boolean downPressed = false;
+boolean upPressed = false;
+
+final int GAME_INIT_TIMER = 5400;
+int gameTimer = GAME_INIT_TIMER;
+final float FUEL_BONUS_SECONDS = 5f;
+final float HOLE_MINUS_SECONDS = 15f;
+
+PFont font1;
+
+Diamond[] diamonds;
+float[] diamondX;
+float[] diamondY;
+Fuel[] fuels;
+float[] fuelX;
+float[] fuelY;
+Hole[] holes;
+float[] holeX;
+float[] holeY;
+
+Player player;
+
+//Bullet & Enemy
+Enemy[] enemy = new Enemy[20];
+int enemyCounter = 0 ;
+int moveEnemy1, moveEnemy2;
+int nextEnemyShowTime;
+int frameCounter = 0;
+
+
+Bullet[] pBullet = new Bullet[50];
+Bullet[] eBullet = new Bullet[50];
+
+void setup(){
+  
+  size(720,450,P2D);
+  frameRate(60);
+  //loadimage
+  bg = loadImage("img/bg.jpg");
+  plane = loadImage("img/plane.png");
+  start1 = loadImage("img/start1.png");
+  lose1 = loadImage("img/lose1.png");
+  start2 = loadImage("img/start2.png");
+  lose2 = loadImage("img/lose2.png");
+  diamond = loadImage("img/diamond.png");
+  fuel = loadImage("img/fuel.png");
+  hole = loadImage("img/hole.png");
+  win = loadImage("img/win.png");
+  secondCrash = loadImage("img/2ndcrash.png");
+  rule1 = loadImage("img/rule1.png");
+  rule2 = loadImage("img/rule2.png");
+  
+  font1 = createFont("font/font1.ttf", 50);
+  textFont(font1);
+  
+  // Initialize Game
+  initGame();
+}
+
+void initGame(){
+
+  gameTimer = GAME_INIT_TIMER;
+
+  // Initialize player
+  player = new Player();
+  
+  // Initialize enemies and their position
+
+  // Initialize diamonds and their position
+  diamonds = new Diamond[21];
+  diamondX = new float[21];
+  diamondY = new float[21];
+  numOfDiamond = 20;
+  for(int i = 1; i <= numOfDiamond; i++){
+    diamondX[i] = 90 * (i * 7 + int(random(5)));
+    diamondY[i] = 90 * (int(random(0,5)));  
+    diamonds[i] = new Diamond(diamondX[i], diamondY[i]);  
+    
+  }
+  
+  // Initialize fuels and their position
+  fuelX = new float[21];
+  fuelY = new float[21];
+  fuels = new Fuel[21];
+  numOfFuel = 20;
+  for(int i = 1; i <= numOfFuel; i++){
+    for(int j = 1; j <= numOfDiamond; j++){
+    fuelX[i] = 90 * (i * 7 + int(random(9)));
+    fuelY[i] = 90 * (int(random(0,5)));
+      if(i<=j){
+        if(fuelX[i] == diamondX[j]){
+        fuelX[i] = 90 * (i * 7 + int(random(9)));
+        }
+        if(fuelY[i] == diamondY[j]){
+        fuelX[Y] = 90 * (i * 7 + int(random(9)));
+        }
+    fuels[i] = new Fuel(fuelX[i], fuelY[i]); 
+      }  
+    }
+  }
+  
+   // Initialize holes and their position
+  holeX = new float[21];
+  holeY = new float[21];
+  holes = new Hole[21];
+  numOfHole = 20;
+  for(int i = 1; i <= numOfHole; i++){
+    for(int j=1; j<= numOfDiamond; j++){
+      for(int k=1; k< numOfFuel; k++){
+    holeX[i] = 127 * (i * 7 + int(random(9)));
+    holeY[i] = 73 * (int(random(0,5)));
+    
+    if(holeX[i] == diamondX[j]){
+      holeX[i] = 127 * (i * 7 + int(random(9)));
+    }
+    if(holeX[i] == fuelX[k]){
+      holeX[i] = 127 * (i * 7 + int(random(9)));
+    }
+    holes[i] = new Hole(holeX[i], holeY[i]); 
+      }
+    }
+  }
+  //Enemy
+  moveEnemy1 = floor(random(0, enemy.length/2));
+  moveEnemy2 = floor(random(enemy.length/2, enemy.length));
+  nextEnemyShowTime = 0; 
+
+}
+
+void draw(){
+ 
+ switch(gameState){ 
+   
+   case GAME_START:
+     //bg
+     image(start1,0,0,720,450);
+     if(mouseX>=286 && mouseX<=452 && mouseY>=338 && mouseY<=417){
+       image(start2,0,0,720,450);
+       if(mousePressed){
+         gameState = GAME_RULE;
+       }
+     }
+     break;
+   case GAME_RULE:
+     image(rule1,0,0,720,450);
+     if(mouseX>=498 && mouseX<=572 && mouseY>=324 && mouseY<=398){
+       image(rule2,0,0,720,450);
+       if(mousePressed){
+         gameState = GAME_RUN;
+       }
+     }
+   break;
+  
+   //first stage  
+   case GAME_RUN:
+     //bg
+     image(bg,bgX,0,720,450);
+     image(bg,bgX+720,0,720,450);
+     /*make bg move to left*/
+     bgX += bgSpeed;
+     bgX %= 720;
+     
+     // Player
+     player.update();
+     if (frameCounter % 30 == 0){
+        player.shot();}
+     
+     // Diamonds
+     for(int i = 1; i <= numOfDiamond; i++){   
+      diamonds[i].checkCollision(player);      
+      diamonds[i].display();   
+      diamonds[i].x += bgSpeed;     
+    }
+    
+    // Fuels
+     for(int i = 1; i <= numOfFuel; i++){   
+      fuels[i].checkCollision(player);      
+      fuels[i].display();   
+      fuels[i].x += bgSpeed;     
+    }
+    
+    // Holes
+     for(int i = 1; i <= numOfHole; i++){   
+      holes[i].checkCollision(player);      
+      holes[i].display();   
+      holes[i].x += bgSpeed;     
+    }
+    
+     //time
+     textAlign(LEFT, BOTTOM);
+     String timeString = convertFramesToTimeString(gameTimer);
+     fill(0, 120);
+     text(timeString, 3, height + 3);
+     fill(getTimeTextColor(gameTimer));
+     text(timeString, 0, height);
+
+     //Enemys
+     if(frameCounter == nextEnemyShowTime) {
+
+    if(enemyCounter == moveEnemy1 || enemyCounter == moveEnemy2) {
+      enemy[enemyCounter] = new moveEnemy();
+    } else {
+      enemy[enemyCounter] = new shotEnemy();
+    }
+    
+    enemyCounter++;
+    enemyCounter %= 20;
+    
+    nextEnemyShowTime = frameCounter + floor(random(50, 120));
+    
+  }
+  
+  /* the enemy bullet */
+  for(Bullet EB : eBullet) {
+    if(EB != null && EB.isAlive) {
+      EB.move();
+      EB.display();
+      
+      /* when enemy bullet collision to player will... */
+      if(player.checkCollision(EB.x, EB.y, EB.w, EB.h)) {
+        EB.isAlive = false;
+      }
+    }
+  }
+  
+  
+
+
+  
+  
+  /* the player bullet */
+  for(Bullet PB : pBullet) {
+    if(PB != null && PB.isAlive) {
+      PB.move();
+      PB.display();
+      
+      /* when player bullet collision to enemy will... */
+      for(Enemy E : enemy) {
+        if (E != null && E.isAlive) {
+          if(E.checkCollision(PB.x, PB.y, PB.w, PB.h)) {
+            PB.isAlive = false;
+            break;
+          }
+        }
+      }
+    }
+  }
+  
+  
+  /* the enemy */
+  for(Enemy E : enemy ) {
+    if (E != null && E.isAlive) {
+      E.move();
+      E.update();
+      E.display();
+    }
+  } 
+  
+  /* the bullet */
+  for(Bullet PB : pBullet) {
+    if(PB != null && PB.isAlive) {
+      
+      for(Bullet EB : eBullet) {
+        if(EB != null && EB.isAlive) {
+          
+          if(isHit(PB.x, PB.y, PB.w, PB.h, EB.x, EB.y, EB.w, EB.h)) {
+            PB.isAlive = false;
+            EB.isAlive = false;
+            break;
+          }
+        }
+      }
+    }
+  }
+  
+  frameCounter++;
+     
+     //PASS CONDITION : GET 8 DIAMOND
+     //FAIL CONDITION : OUT OF FUEL
+     
+     gameTimer --;
+     if(gameTimer <= 0) {gameState = GAME_LOSE;}
+     
+     
+     break;
+     
+     
+    
+     
+   case GAME_LOSE:
+   
+   //bg
+     image(lose1,0,0,720,450);
+     if(mouseX>=33 && mouseX<=185 && mouseY>=352 && mouseY<=424){
+       image(lose2,0,0,720,450);
+       if(mousePressed){
+         gameState = GAME_RUN;
+         gameTimer = GAME_INIT_TIMER;
+         initGame();
+       }
+     }
+     break;
+ 
+    
+    
+     case GAME_WIN:
+     //bg
+     image(win,0,0,720,450);
+     if(mouseX>=291 && mouseX<=460 && mouseY>=337 && mouseY<= 417){
+       image(secondCrash,0,0,720,450);
+       if(mousePressed){
+         gameState = GAME_RUN;
+         gameTimer = GAME_INIT_TIMER;
+         initGame();
+       }
+     }
+     break;
+ 
+    
+ }
+ 
+ }
+ 
+ boolean isHit(float ax, float ay, float aw, float ah, float bx, float by, float bw, float bh){
+  return  ax + aw > bx &&    // a right edge past b left
+        ax < bx + bw &&    // a left edge past b right
+        ay + ah > by &&    // a top edge past b bottom
+        ay < by + bh;
+}
+
+void addTime(float seconds) {
+  gameTimer += round(seconds * 60);
+}
+
+void minusTime(float seconds){         
+  gameTimer -= round(seconds * 60);
+}
+
+
+String convertFramesToTimeString(int frames) {
+  String result = "";
+  float totalSeconds = float(frames) / 60;
+  result += nf(floor(totalSeconds/60), 2);
+  result += ":";
+  result += nf(floor(totalSeconds%60), 2);
+  return result;
+}
+
+
+color getTimeTextColor(int frames){        // Requirement #5
+  color _color = #00ffff;
+  int second = frames/60;
+  if(second<120){
+    _color = #ffffff;
+  }
+  if(second<60){
+    _color = #ffcc00;
+  }
+  if(second<30){
+    _color = #ff6600;
+  }
+  if(second<10){
+    _color = #ff0000;
+  }
+  return _color;
+}
+
+
+
+     
+   
+     
+     
+
+
+
+
+
+void keyPressed(){
+  if(key==CODED){
+    switch(keyCode){
+      case LEFT:
+      leftPressed = true;
+      break;
+      case RIGHT:
+      rightPressed = true;
+      break;
+      case DOWN:
+      downPressed = true;
+      break;
+      case UP:
+      upPressed = true;
+      break;
+    }
+  }
+ 
+}
+
+void keyReleased(){
+  if(key==CODED){
+    switch(keyCode){
+      case LEFT:
+      leftPressed = false;
+      break;
+      case RIGHT:
+      rightPressed = false;
+      break;
+      case DOWN:
+      downPressed = false;
+      break;
+      case UP:
+      upPressed = false;
+      break;
+    }
+  }
+}
