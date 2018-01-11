@@ -1,0 +1,45 @@
+class Enemy {
+  
+  boolean isAlive = true;
+  PImage enemy;
+  float x = width;
+  float y;
+  float xSpeed;
+  float ySpeed;
+  float w = 50;
+  float h = 50;
+  int frameCounter = 0;
+
+  Enemy() {
+    y = random(height);
+    xSpeed = random(-1, -4);
+    ySpeed = random(-2, 2);
+  }
+  
+  void update() {
+    frameCounter++;
+  }
+  
+  void move() {
+    if(x + w < 0 || x > width || y + h < 0 || y > height) {
+      isAlive = false;
+    } 
+  }
+  
+  void display() {
+    image(enemy, x, y, w, h);
+  }
+  
+  boolean checkCollision(float targetX, float targetY, float targetW, float targetH){
+    
+    boolean isCollision = false;
+    
+    if(isHit(x, y, w, h, targetX, targetY, targetW, targetH)){
+      isCollision = true;
+      isAlive = false;
+    }
+    
+    return isCollision;
+  }
+  
+}
