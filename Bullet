@@ -1,0 +1,33 @@
+class Bullet {
+  boolean isAlive = true;
+  float x, y, xSpeed, ySpeed;
+  float w = 10;
+  float h = 10;
+  int type;
+
+  Bullet(int type, float initX, float initY, float initXSpeed, float initYSpeed) {
+     this.type = type;
+     x = initX;
+     y = initY + 25;
+     xSpeed = initXSpeed;
+     ySpeed = initYSpeed;
+  }
+  
+  void display() {
+      noStroke();
+      if (type == 0) { 
+        fill(255, 0, 0); 
+      } else if (type == 1) {
+        fill(0, 255, 0);
+      }
+      ellipse(x, y, w, h);
+  }  
+  
+  void move() {
+    x += xSpeed;
+    
+    if(x + w < 0 || x > width || y + h < 0 || y > height) {
+      isAlive = false;
+    } 
+  }
+}
