@@ -1,0 +1,32 @@
+class moveEnemy extends Enemy {
+  float hereX, hereY;
+  
+  moveEnemy() {
+    super();
+    enemy = loadImage("img/enemy1.png");
+  } 
+    
+  void update() {
+    super.update();
+    
+  }
+  
+  void move() {
+    x += xSpeed;
+    y += ySpeed;
+    if (frameCounter<120){
+        super.move(); 
+        hereX=x;
+        hereY=y;
+              }
+    if(frameCounter==120){
+      xSpeed=((mouseX-hereX)/36);
+             
+      ySpeed=((mouseY-hereY)/36);
+            }
+  }
+ 
+  void display() { 
+    super.display();
+  }
+}
