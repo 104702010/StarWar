@@ -1,0 +1,30 @@
+class Hole extends Item{
+   
+  Hole(float x, float y){
+    super(x,y);
+  }
+  
+   void display(){ 
+    if(isAlive){
+      image(hole, x, y,127,73);
+    }
+  }
+  
+  void checkCollision(Player player){ 
+      if(isAlive == true && isHit(x, y, 127, 73, player.x, player.y, player.w, player.h)){
+        //if(isAlive){
+        //   if(player.health < player.PLAYER_MAX_HEALTH){
+        //     player.health ++;
+        //     isAlive = false;
+        //   }
+        // }
+        minusTime(HOLE_MINUS_SECONDS);
+        isAlive = false;
+       
+      }
+    }
+  
+  
+  
+  
+}
